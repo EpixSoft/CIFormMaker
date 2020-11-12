@@ -1,0 +1,127 @@
+<ifModule mod_php4.c>
+php_value zlib.output_compression 16386
+</ifModule>
+
+<IfModule mod_security.c>
+  SecFilterEngine Off
+  SecFilterScanPOST Off
+</IfModule>
+
+<ifModule mod_gzip.c>
+  mod_gzip_on Yes
+  mod_gzip_dechunk Yes
+  mod_gzip_item_include file \.(html?|txt|css|js|php|pl)$
+  mod_gzip_item_include mime ^application/x-javascript.*
+  mod_gzip_item_include mime ^text/.*
+  mod_gzip_item_exclude rspheader ^Content-Encoding:.*gzip.*
+  mod_gzip_item_exclude mime ^image/.*
+  mod_gzip_item_exclude mime ^assets/image/.*
+  mod_gzip_item_include handler ^cgi-script$
+</ifModule>
+
+# Tarayıcı Önbelleği Kaldırma
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpg "access 1 year"
+  ExpiresByType image/jpeg "access 1 year"
+  ExpiresByType image/gif "access 1 year"
+  ExpiresByType image/png "access 1 year"
+  ExpiresByType text/css "access 1 month"
+  ExpiresByType text/html "access 1 month"
+  ExpiresByType application/pdf "access 1 month"
+  ExpiresByType text/x-javascript "access 1 month"
+  ExpiresByType application/x-shockwave-flash "access 1 month"
+  ExpiresByType image/x-icon "access 1 year"
+  ExpiresDefault "access 1 month"
+</IfModule>
+
+<IfModule mod_headers.c>
+
+  <IfModule mod_env.c>
+      # Güvenlik ve gizlilikle ilgili üstbilgileri ekle
+     Header set X-Content-Type-Options "nosniff"
+     Header set X-XSS-Protection "1; mode=block"
+     Header set X-Robots-Tag "Index,Follow"
+     Header set X-Download-Options "noopen"
+     Header set X-Permitted-Cross-Domain-Policies "none"
+     SetEnv modHeadersAvailable true
+  </IfModule>
+
+  # Statik kaynaklar için önbellek denetimi ekle
+  <filesmatch "\.(ico|flv|jpg|jpeg|png|gif|svg|css|js|swf)$">
+  Header set Cache-Control "max-age=2678400, public"
+  </filesmatch>
+  <filesmatch "\.(html|htm)$">
+  Header set Cache-Control "max-age=7200, private, must-revalidate"
+  </filesmatch>
+  <filesmatch "\.(pdf)$">
+  Header set Cache-Control "max-age=86400, public"
+  </filesmatch>
+  <filesmatch "\.(js)$">
+  Header set Cache-Control "max-age=2678400, private"
+  </filesmatch>
+
+  # Tarayıcılar bir hafta boyunca WOFF dosyalarını önbelleğe alsın
+  <FilesMatch "\.woff$">
+    Header set Cache-Control "max-age=604800"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_php5.c>
+    php_value upload_max_filesize 511M
+    php_value post_max_size 511M
+    php_value memory_limit 512M
+    php_value mbstring.func_overload 0
+    php_value always_populate_raw_post_data -1
+    php_value default_charset 'UTF-8'
+    <IfModule mod_env.c>
+      SetEnv htaccessWorking true
+    </IfModule>
+</IfModule>
+
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 511M
+    php_value post_max_size 511M
+    php_value memory_limit 512M
+    php_value mbstring.func_overload 0
+    php_value default_charset 'UTF-8'
+    <IfModule mod_env.c>
+      SetEnv htaccessWorking true
+    </IfModule>
+</IfModule>
+
+Options -Indexes
+Options +FollowSymLinks
+
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteCond $1 !^(index\.php|resources|robots\.txt|(.*)\.swf|forums|images|css|downloads|jquery|js|favicon\.ico)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php/$1 [L]
+</IfModule>
+
+
+ErrorDocument 401 /404.php
+ErrorDocument 403 /404.php
+ErrorDocument 404 /404.php
+
+<IfModule mod_mime.c>
+  AddType image/svg+xml svg svgz
+  AddEncoding gzip svgz
+</IfModule>
+
+<IfModule mod_dir.c>
+  DirectoryIndex index.php index.html
+</IfModule>
+
+AddDefaultCharset utf-8
+Options -Indexes
+
+<IfModule pagespeed_module>
+  ModPagespeed Off
+</IfModule>
+
+order allow,deny
+#deny from 172.30.14
+allow from all
